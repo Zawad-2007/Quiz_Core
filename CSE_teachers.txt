@@ -1,0 +1,3 @@
+Name                            Dept Code       Designation Code    Joining Date                    Password
+Karim Mia                       CSE             ALect               03/05/2018                      Dib9dWuBx
+Mohsin Ali                      CSE             ALect               02/11/2016                      Bib6dUtIp

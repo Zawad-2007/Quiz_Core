@@ -1,0 +1,83 @@
+#ifndef MISC_H
+#define MISC_H
+
+#include <string.h>
+#include "affine_cipher.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <strings.h>
+#include <time.h>
+#include <ctype.h>
+
+enum mainMenuOpt
+{
+    STUD_MENU=1,
+    TEACHER_MENU,
+    ADMIN_MENU,
+    EXIT_MAIN_MENU
+};
+
+enum studMenuOpt
+{
+    START_QUIZ=1,
+    PROGRESS,
+    EXIT_STUD_MENU
+};
+
+enum teacherMenuOpt
+{
+    ENCRYPT_QUES=1,
+    WATCH_PROGRESS,
+    DECRYPT_PROGRESS,
+    EXIT_TEACHER_MENU
+};
+
+    typedef struct
+{
+    char name[32];
+    char roll[16];
+    char subject[32];
+    char quiz_code[16];
+    char quiz_date[32];
+    int total_marks;
+    int correct_ans;
+    int wrong_ans;
+    int ignored;
+    float accuracy;
+} QuizResult;
+
+typedef struct
+{
+    char name[32];
+    char roll[16];
+    char subject[32];
+    char quiz_code[16];
+    char quiz_date[32];
+    char total_marks[8];
+    char correct_ans[8];
+    char wrong_ans[8];
+    char ignored[8];
+    char accuracy[8];
+} QuizResultStr;
+
+typedef struct
+{
+    char quiz_code[16];
+    char seconds_per_ques[4];
+} QuestionHeader;
+
+#ifndef ERR_STR
+#define ERR_STR "\033[31mFILE error\033[0m\n"
+#endif
+
+void print_file_err(void);
+
+void rm_newl(char *string, int lenght);
+
+void rm_extra_spaces(char *str);
+
+void get_date_str(char *d_str, int size);
+
+#endif

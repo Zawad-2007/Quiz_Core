@@ -1,0 +1,219 @@
+#include "../include/teacher_menu.h"
+
+void handle_teacher_menu(TeacherLoginDta *teacher)
+{
+    while (1)
+    {
+        clear_screen();
+        print_banner();
+        printf("==================================================\n");
+        printf("                 TEACHER DASHBOARD                \n");
+        printf("  Logged in as: %s (%s, Dept: %s)\n",
+               teacher->name, teacher->designation_code, teacher->dept_code);
+        printf("==================================================\n");
+        printf("1. Encrypt questions (create new quiz)\n");
+        printf("2. Watch student progress\n");
+        printf("3. Decrypt & export progress file\n");
+        printf("4. Logout & return to main menu\n\n");
+
+        int teacher_menu_opt = 0;
+        printf("Enter option (1-4): ");
+        if (scanf("%d", &teacher_menu_opt) != 1)
+        {
+            while (getchar() != '\n');
+            continue;
+        }
+        getchar();
+
+        switch (teacher_menu_opt)
+        {
+        case ENCRYPT_QUES:
+        {
+            clear_screen();
+            print_banner();
+            printf("==================================================\n");
+            printf("             SELECT QUESTION TYPE TO ENCRYPT      \n");
+            printf("==================================================\n");
+            printf("1. Multiple Choice Questions (MCQ)\n");
+            printf("2. True / False Questions\n");
+            printf("3. Fill in the Blanks Questions\n");
+            printf("4. Back to Teacher Dashboard\n\n");
+
+            int qtype = 0;
+            printf("Select type (1-4): ");
+            if (scanf("%d", &qtype) != 1)
+            {
+                while (getchar() != '\n');
+                continue;
+            }
+            getchar();
+
+            if (qtype == 4)
+            {
+                break;
+            }
+            if (qtype < 1 || qtype > 4)
+            {
+                printf("Invalid selection!\n");
+                printf("Press Enter to continue...");
+                getchar();
+                break;
+            }
+
+            char og_ques_filepath[64];
+            printf("Enter filepath of original questions: ");
+            if (fgets(og_ques_filepath, sizeof(og_ques_filepath), stdin) == NULL)
+            {
+                break;
+            }
+            rm_newl(og_ques_filepath, sizeof(og_ques_filepath));
+            rm_extra_spaces(og_ques_filepath);
+            if (strlen(og_ques_filepath) == 0)
+            {
+                print_file_err();
+                printf("Press Enter to continue...");
+                getchar();
+                break;
+            }
+
+            FILE *f_check_og = fopen(og_ques_filepath, "r");
+            if (f_check_og == NULL)
+            {
+                print_file_err();
+                printf("Press Enter to continue...");
+                getchar();
+                break;
+            }
+            fclose(f_check_og);
+
+            char encr_ques_filepath[64];
+            printf("Enter filepath for output encrypted file: ");
+            if (fgets(encr_ques_filepath, sizeof(encr_ques_filepath), stdin) == NULL)
+            {
+                break;
+            }
+            rm_newl(encr_ques_filepath, sizeof(encr_ques_filepath));
+            rm_extra_spaces(encr_ques_filepath);
+            if (strlen(encr_ques_filepath) == 0)
+            {
+                print_file_err();
+                printf("Press Enter to continue...");
+                getchar();
+                break;
+            }
+
+            QuestionHeader ques_head;
+            memset(&ques_head, 0, sizeof(QuestionHeader));
+
+            printf("Enter quiz code (e.g. CSE-1107): ");
+            if (fgets(ques_head.quiz_code, sizeof(ques_head.quiz_code), stdin) == NULL)
+            {
+                break;
+            }
+            rm_newl(ques_head.quiz_code, sizeof(ques_head.quiz_code));
+            rm_extra_spaces(ques_head.quiz_code);
+
+            printf("Enter allocated time per question in seconds (e.g. 30): ");
+            if (fgets(ques_head.seconds_per_ques, sizeof(ques_head.seconds_per_ques), stdin) == NULL)
+            {
+                break;
+            }
+            rm_newl(ques_head.seconds_per_ques, sizeof(ques_head.seconds_per_ques));
+            rm_extra_spaces(ques_head.seconds_per_ques);
+
+            int result = 0;
+            if (qtype == 1)
+            {
+                result = encrypt_mcq_question(og_ques_filepath, encr_ques_filepath, &ques_head);
+            }
+            else if (qtype == 2)
+            {
+                result = encrypt_tf_question(og_ques_filepath, encr_ques_filepath, &ques_head);
+            }
+            else if (qtype == 3)
+            {
+                result = encrypt_blank_question(og_ques_filepath, encr_ques_filepath, &ques_head);
+            }
+
+            if (result > 0)
+            {
+                printf("\n\033[32mSuccessfully encrypted %d questions to '%s'!\033[0m\n",
+                       result, encr_ques_filepath);
+            }
+            else
+            {
+                printf("\n\033[31mFailed to encrypt questions. Please check the file path and format.\033[0m\n");
+            }
+
+            printf("Press Enter to continue...");
+            getchar();
+            break;
+        }
+        case WATCH_PROGRESS:
+        {
+            clear_screen();
+            print_banner();
+            printf("==================================================\n");
+            printf("               STUDENT PROGRESS LOG               \n");
+            printf("==================================================\n");
+
+            char progress_filepath[64] = {0};
+            printf("Enter filepath of progress file: ");
+            if (fgets(progress_filepath, sizeof(progress_filepath), stdin) == NULL)
+            {
+                break;
+            }
+            rm_newl(progress_filepath, sizeof(progress_filepath));
+            rm_extra_spaces(progress_filepath);
+            if (strlen(progress_filepath) == 0)
+            {
+                print_file_err();
+                printf("Press Enter to return to Teacher Dashboard...");
+                getchar();
+                break;
+            }
+
+            show_all_progress_from_file(progress_filepath);
+            printf("Press Enter to return to Teacher Dashboard...");
+            getchar();
+            break;
+        }
+        case DECRYPT_PROGRESS:
+        {
+            clear_screen();
+            print_banner();
+            printf("==================================================\n");
+            printf("             DECRYPT & EXPORT PROGRESS            \n");
+            printf("==================================================\n");
+
+            char encr_progress_filepath[64] = {0};
+            printf("Enter filepath of encrypted progress file: ");
+            if (fgets(encr_progress_filepath, sizeof(encr_progress_filepath), stdin) == NULL)
+            {
+                break;
+            }
+            rm_newl(encr_progress_filepath, sizeof(encr_progress_filepath));
+            rm_extra_spaces(encr_progress_filepath);
+            if (strlen(encr_progress_filepath) == 0)
+            {
+                print_file_err();
+                printf("Press Enter to return to Teacher Dashboard...");
+                getchar();
+                break;
+            }
+
+            decrypt_and_save_progress(encr_progress_filepath);
+            printf("Press Enter to return to Teacher Dashboard...");
+            getchar();
+            break;
+        }
+        case EXIT_TEACHER_MENU:
+            printf("\nLogging out...\n");
+            return;
+        default:
+            printf("Invalid option. Press Enter to continue...");
+            getchar();
+            break;
+        }
+    }
+}
